@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint — ruff
+        run: ruff check src tests
+
+      - name: Lint — mypy
+        run: mypy src
+
+      - name: Import smoke test
+        run: |
+          python -c "
+          from constellation_template import (
+              TemplateConfig,
+              TemplateError,
+              TemplateConfigError,
+              TemplateRuntimeError,
+              get_template_config,
+          )
+          print('import OK')
+          "
+
+      - name: Config safe-default smoke test
+        run: |
+          python -c "
+          from constellation_template import get_template_config
+          c = get_template_config()
+          assert c.enabled is True, f'expected enabled=True, got {c.enabled}'
+          print('config defaults OK')
+          "
+
+      - name: Kill-switch smoke test
+        run: |
+          python -c "
+          import os
+          os.environ['L9_TEMPLATE_ENABLED'] = 'false'
+          from constellation_template.config import TemplateConfig
+          c = TemplateConfig(enabled=False)
+          assert c.enabled is False
+          print('kill-switch OK')
+          "
+
+      - name: Unit tests
+        run: pytest tests/unit/ -q
+
+      - name: Integration tests
+        run: pytest tests/integration/ -q
