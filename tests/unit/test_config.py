@@ -14,19 +14,20 @@ def test_safe_defaults_no_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_kill_switch_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    """L9_TEMPLATE_ENABLED=false must disable the capability."""
+    get_template_config.cache_clear()
     monkeypatch.setenv("L9_TEMPLATE_ENABLED", "false")
-    # Direct construction bypasses lru_cache for this test
-    from constellation_template.config import _env_bool
-    enabled = _env_bool("L9_TEMPLATE_ENABLED", True)
-    config = TemplateConfig(enabled=enabled)
+    config = get_template_config()
     assert config.enabled is False
 
 
 def test_kill_switch_true_variants(monkeypatch: pytest.MonkeyPatch) -> None:
-    for truthy in ("1", "true", "yes", "on", "TRUE", "YES"):
+    """pydantic-settings accepts standard truthy env var values."""
+    for truthy in ("1", "true", "yes", "on", "True", "YES"):
+        get_template_config.cache_clear()
         monkeypatch.setenv("L9_TEMPLATE_ENABLED", truthy)
-        from constellation_template.config import _env_bool
-        assert _env_bool("L9_TEMPLATE_ENABLED", False) is True
+        config = get_template_config()
+        assert config.enabled is True, f"expected enabled=True for value {truthy!r}"
 
 
 def test_config_is_frozen() -> None:
@@ -38,3 +39,15 @@ def test_config_is_frozen() -> None:
 def test_config_rejects_extra_fields() -> None:
     with pytest.raises(Exception):  # noqa: B017
         TemplateConfig(enabled=True, unknown_field="boom")  # type: ignore[call-arg]
+
+
+def test_validate_safe_ok() -> None:
+    config = TemplateConfig(enabled=True)
+    assert config.validate_safe() == []
+
+
+def test_validate_safe_disabled() -> None:
+    config = TemplateConfig(enabled=False)
+    warnings = config.validate_safe()
+    assert len(warnings) == 1
+    assert "disabled" in warnings[0]

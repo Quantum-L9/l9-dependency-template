@@ -42,7 +42,7 @@ Every new node installs these at creation time, in order:
 1. constellation_node_sdk     — always, no exceptions
 2. constellation_ingest       — if node reads files or repos
 3. constellation_obs          — (future) structured telemetry
-4. constellation_store        — (future) storage adapters  
+4. constellation_store        — (future) storage adapters
 5. constellation_auth         — (future) extended auth helpers
 6. domain-<name>              — the node's unique business logic
 ```
@@ -64,18 +64,18 @@ git clone https://github.com/cryptoxdog/Constellation.PackageTemplate Constellat
 cd Constellation.<Capability>
 git remote set-url origin https://github.com/cryptoxdog/Constellation.<Capability>
 
-# Rename placeholders (adjust <capability> and <Capability> and <CAPABILITY>)
+# Rename placeholders — IMPORTANT: subclasses MUST be renamed before the base class.
+# Replace <capability>, <Capability>, <CAPABILITY> with your actual values before running.
 find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.md" \) \
   | xargs sed -i \
       -e 's/constellation_template/constellation_<capability>/g' \
       -e 's/constellation-template/constellation-<capability>/g' \
-      -e 's/TemplateConfig/<Capability>Config/g' \
-      -e 's/TemplateError/<Capability>Error/g' \
       -e 's/TemplateConfigError/<Capability>ConfigError/g' \
       -e 's/TemplateRuntimeError/<Capability>RuntimeError/g' \
+      -e 's/TemplateError/<Capability>Error/g' \
+      -e 's/TemplateConfig/<Capability>Config/g' \
       -e 's/get_template_config/get_<capability>_config/g' \
-      -e 's/L9_TEMPLATE_/L9_<CAPABILITY>_/g' \
-      -e 's/constellation-template/constellation-<capability>/g'
+      -e 's/L9_TEMPLATE_/L9_<CAPABILITY>_/g'
 
 mv src/constellation_template src/constellation_<capability>
 

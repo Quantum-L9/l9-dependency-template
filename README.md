@@ -7,8 +7,9 @@ Canonical scaffold for all `constellation_*` birth-dependency packages in the L9
 Every `constellation_*` infrastructure package shares an identical foundation layer.
 This repo is that foundation. Clone → rename `<capability>` → write unique logic. Done.
 
-The entire foundation (pyproject, config, errors, AGENTS.md, CI, Makefile, tests) is pre-built
-and pre-validated. Build cycles for new packages start at the unique logic layer, not from scratch.
+The entire foundation (pyproject, config, errors, health, AGENTS.md, CI, Makefile, tests) is
+pre-built and pre-validated. Build cycles for new packages start at the unique logic layer, not
+from scratch.
 
 ---
 
@@ -19,15 +20,16 @@ git clone https://github.com/cryptoxdog/Constellation.PackageTemplate Constellat
 cd Constellation.<Capability>
 git remote set-url origin https://github.com/cryptoxdog/Constellation.<Capability>
 
-# Rename all placeholders (replace ingest/Ingest/INGEST with your capability)
+# Rename all placeholders.
+# IMPORTANT: subclasses (ConfigError, RuntimeError) MUST come before the base (Error).
 find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.md" \) \
   | xargs sed -i \
       -e 's/constellation_template/constellation_<capability>/g' \
       -e 's/constellation-template/constellation-<capability>/g' \
-      -e 's/TemplateConfig/<Capability>Config/g' \
       -e 's/TemplateConfigError/<Capability>ConfigError/g' \
       -e 's/TemplateRuntimeError/<Capability>RuntimeError/g' \
       -e 's/TemplateError/<Capability>Error/g' \
+      -e 's/TemplateConfig/<Capability>Config/g' \
       -e 's/get_template_config/get_<capability>_config/g' \
       -e 's/L9_TEMPLATE_/L9_<CAPABILITY>_/g'
 
@@ -49,12 +51,13 @@ git push -u origin main
 
 After renaming, every new package only needs:
 
-1. **Config fields** — add to `<Capability>Config` with safe defaults + `L9_<CAPABILITY>_*` env vars
+1. **Config fields** — add to `<Capability>Config` with safe defaults + `L9_<CAPABILITY>_*` env vars (pydantic-settings reads them automatically via `env_prefix`)
 2. **Logic modules** — add under `src/constellation_<capability>/`
 3. **Public exports** — add to `__init__.py` `__all__`
 4. **Unit tests** — add under `tests/unit/`
-5. **CLI entrypoint** — uncomment `[project.scripts]` in `pyproject.toml` if needed
-6. **Extras** — add `[project.optional-dependencies]` extras for optional heavy deps
+5. **Health details** — extend `health.py` `details` dict with capability-specific readiness info
+6. **CLI entrypoint** — uncomment `[project.scripts]` in `pyproject.toml` if needed
+7. **Extras** — add `[project.optional-dependencies]` extras for optional heavy deps
 
 ---
 
