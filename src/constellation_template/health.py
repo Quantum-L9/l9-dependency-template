@@ -7,42 +7,30 @@ tags: [health, observability]
 owner: platform-team
 status: active
 --- /L9_META ---
-
-Health check surface for constellation_template.
-
-Exposes health_check() and HealthResult for use by nodes, orchestrators,
-and CLI --check commands. Never raises. Always returns a structured result.
-Replace 'template' / 'Template' throughout when bootstrapping a new package.
 """
 from __future__ import annotations
+import threading
+from importlib.metadata import PackageNotFoundError, version
 
-import constellation_template
 from constellation_template.config import get_template_config
+from constellation_template.logging import get_logger
+
+_log = get_logger(__name__)
+_LOCK: threading.Lock = threading.Lock()
+
+try:
+    _VERSION: str = version("constellation-template")
+except PackageNotFoundError:
+    _VERSION = "0.0.0+unknown"
 
 
 class HealthResult:
-    """Immutable health snapshot for a constellation_* capability.
-
-    Attributes:
-        capability: PyPI package name (e.g. "constellation-template").
-        version: Package __version__ string.
-        enabled: Whether the capability kill-switch is on.
-        status: "ok" | "disabled" | "degraded".
-        warnings: List of non-fatal warning messages from validate_safe().
-        details: Arbitrary key/value metadata safe to log (no secrets).
-    """
-
+    """Immutable health snapshot for a constellation_* capability."""
     __slots__ = ("capability", "version", "enabled", "status", "warnings", "details")
 
     def __init__(
-        self,
-        *,
-        capability: str,
-        version: str,
-        enabled: bool,
-        status: str,
-        warnings: list[str],
-        details: dict[str, object],
+        self, *, capability: str, version: str, enabled: bool,
+        status: str, warnings: list[str], details: dict[str, object],
     ) -> None:
         object.__setattr__(self, "capability", capability)
         object.__setattr__(self, "version", version)
@@ -62,36 +50,31 @@ class HealthResult:
         )
 
     def is_ok(self) -> bool:
-        """Return True only when status is 'ok'."""
         return self.status == "ok"
 
 
 def health_check() -> HealthResult:
-    """Return a non-raising health snapshot for this capability.
-
-    Safe to call at any time — catches all exceptions internally.
-    Replace 'constellation-template' and the config import when bootstrapping.
-    """
-    try:
-        cfg = get_template_config()
-        warnings = cfg.validate_safe()
-        status = "ok" if cfg.enabled and not warnings else (
-            "disabled" if not cfg.enabled else "degraded"
-        )
-        return HealthResult(
-            capability="constellation-template",
-            version=constellation_template.__version__,
-            enabled=cfg.enabled,
-            status=status,
-            warnings=warnings,
-            details={"enabled": cfg.enabled},
-        )
-    except Exception as exc:  # noqa: BLE001
-        return HealthResult(
-            capability="constellation-template",
-            version="unknown",
-            enabled=False,
-            status="degraded",
-            warnings=[],
-            details={"error": str(exc)},
-        )
+    """Return a non-raising health snapshot for this capability. Thread-safe."""
+    with _LOCK:
+        try:
+            cfg = get_template_config()
+            warnings = cfg.validate_safe()
+            if not cfg.enabled:
+                status = "disabled"
+            elif warnings:
+                status = "degraded"
+            else:
+                status = "ok"
+            result = HealthResult(
+                capability="constellation-template", version=_VERSION,
+                enabled=cfg.enabled, status=status,
+                warnings=warnings, details={"enabled": cfg.enabled},
+            )
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("health_check failed", error=str(exc))
+            result = HealthResult(
+                capability="constellation-template", version=_VERSION,
+                enabled=False, status="degraded", warnings=[],
+                details={"error": str(exc)},
+            )
+    return result
