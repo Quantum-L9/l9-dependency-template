@@ -1,0 +1,30 @@
+site_name: constellation-template
+site_description: Canonical scaffold for constellation_* birth-dependency packages
+repo_url: https://github.com/cryptoxdog/Constellation.PackageTemplate
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [../src]
+          options:
+            show_source: true
+            docstring_style: google
+
+nav:
+  - Home: index.md
+  - API:
+      - Config: api/config.md
+      - Errors: api/errors.md
+      - Health: api/health.md
+      - Logging: api/logging.md
+      - Protocols: api/protocols.md
+      - Retry: api/retry.md
+      - Tracing: api/tracing.md
