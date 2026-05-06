@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  bump-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2f  # v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv + commitizen + build tools
+        run: |
+          pip install uv
+          uv pip install commitizen hatchling hatch-vcs build
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version + CHANGELOG
+        id: cz
+        run: |
+          cz bump --yes --changelog 2>&1 | tee /tmp/cz_output.txt || true
+          NEW_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [[ -n "$NEW_TAG" && $(git tag --points-at HEAD) == "$NEW_TAG" ]]; then
+            echo "bumped=true"      >> "$GITHUB_OUTPUT"
+            echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "bumped=false"     >> "$GITHUB_OUTPUT"
+            echo "new_tag="         >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push tag + CHANGELOG
+        if: steps.cz.outputs.bumped == 'true'
+        run: git push --follow-tags
+
+      - name: Build distributions
+        if: steps.cz.outputs.bumped == 'true'
+        run: python -m build --outdir dist/
+
+      - name: Sign distributions with sigstore
+        if: steps.cz.outputs.bumped == 'true'
+        uses: sigstore/gh-action-sigstore-python@f514d46b907ebcd5bedc05145c03b69c1edd8b46  # v3.0.0
+        with:
+          inputs: dist/*.whl dist/*.tar.gz
+
+      - name: Publish to PyPI (OIDC trusted publishing)
+        if: steps.cz.outputs.bumped == 'true'
+        uses: pypa/gh-action-pypi-publish@ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0  # v1.9.0
+        with:
+          attestations: true
+
+      - name: Create GitHub Release
+        if: steps.cz.outputs.bumped == 'true'
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191  # v2.0.8
+        with:
+          tag_name: ${{ steps.cz.outputs.new_tag }}
+          generate_release_notes: true
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/*.sigstore.json
