@@ -1,0 +1,6 @@
+org: cryptoxdog
+repo_name: Constellation.PolicyEngine
+package_name: constellation_policy_engine
+description: evaluates OPA-backed policies against PacketEnvelope payloads
+play_number: 5
+work_dir: /tmp/l9-plays

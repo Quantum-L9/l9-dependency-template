@@ -1,0 +1,6 @@
+org: cryptoxdog
+repo_name: Constellation.ReadmeValidator
+package_name: constellation_readme_validator
+description: validates README.meta.yaml files across all Constellation dependency packages
+play_number: 1
+work_dir: /tmp/l9-plays

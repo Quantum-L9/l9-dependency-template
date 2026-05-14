@@ -1,0 +1,7 @@
+org: cryptoxdog
+repo_name: Constellation.PacketEnvelope
+package_name: constellation_packet_envelope
+description: defines the canonical PacketEnvelope schema and serialisation for all L9
+  inter-node transport
+play_number: 2
+work_dir: /tmp/l9-plays

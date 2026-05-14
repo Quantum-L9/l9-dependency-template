@@ -1,0 +1,6 @@
+org: cryptoxdog
+repo_name: Constellation.HealthProbe
+package_name: constellation_health_probe
+description: exposes standardised /v1/health responses across all Constellation services
+play_number: 7
+work_dir: /tmp/l9-plays

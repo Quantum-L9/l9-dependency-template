@@ -1,0 +1,6 @@
+org: cryptoxdog
+repo_name: Constellation.AuditLogger
+package_name: constellation_audit_logger
+description: emits structured, immutable audit events from all Constellation nodes
+play_number: 6
+work_dir: /tmp/l9-plays
