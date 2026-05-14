@@ -70,7 +70,7 @@ work_dir: "/tmp/l9-plays"
 | Play | Repo | Package |
 |------|------|---------|
 | 1 | Constellation.ReadmeValidator | constellation_readme_validator |
-| 2 | Constellation.PacketEnvelope | constellation_packet_envelope |
+| 2 | Constellation.TransportPacket | constellation_transport_packet |
 | 3 | Constellation.SchemaRegistry | constellation_schema_registry |
 | 4 | Constellation.LineageGraph | constellation_lineage_graph |
 | 5 | Constellation.PolicyEngine | constellation_policy_engine |

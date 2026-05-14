@@ -2,7 +2,7 @@
 
 ## Mission
 Create the `constellation_policy_engine` dependency package inside the `cryptoxdog` org.
-This package evaluates OPA-backed policies against PacketEnvelope payloads.
+This package evaluates OPA-backed policies against `TransportPacket` payloads.
 
 ## Context
 - Template source: `cryptoxdog/Constellation.PackageTemplate`
@@ -13,11 +13,13 @@ This package evaluates OPA-backed policies against PacketEnvelope payloads.
 - Zero stubs — every function implemented, typed, tested.
 - Never modify files outside `src/constellation_policy_engine/` and `tests/unit/`.
 - Never re-run a step whose `.done` checkpoint exists.
+- Input type is `TransportPacket` — MUST NOT reference `PacketEnvelope` (DEPR-001 = merge-block).
 
 ## DONEs
 - [ ] Repo `cryptoxdog/Constellation.PolicyEngine` exists
 - [ ] Package renamed `constellation_template` → `constellation_policy_engine`
 - [ ] `capability/` injected
+- [ ] Zero occurrences of `PacketEnvelope` in src or tests
 - [ ] `ruff check` zero errors
 - [ ] `mypy src` zero errors
 - [ ] `pytest tests/unit/ -q` all green
