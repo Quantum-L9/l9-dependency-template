@@ -22,7 +22,7 @@ Layer 0 — Transport Contract
   Every node installs this at birth. Never grows domain logic.
 ```
 
-## Dependency Direction Rule
+## Dependency Direction
 
 ```
 constellation_gate        (no upstream deps within constellation)
@@ -31,8 +31,7 @@ constellation_*        →  may import constellation_node_sdk ONLY
 constellation_node_sdk →  imports nothing within constellation
 ```
 
-Arrows go one direction only: upward.
-If a Layer 1 package imports from a `domain-*` package, the abstraction is in the wrong layer.
+Arrows flow upward only. A Layer 1 package that imports from a `domain-*` package is in the wrong layer.
 
 ## Birth Stack
 
@@ -47,56 +46,14 @@ Every new node installs these at creation time, in order:
 6. domain-<name>              — the node's unique business logic
 ```
 
-## Birth Dependency Acceptance Gate
-
-Every `constellation_*` package must answer YES to all three before shipping:
-
-```
-1. pip install <package>             → succeeds in a clean venv
-2. from <package> import X           → works with zero config
-3. get_<capability>_config()         → returns safe defaults, no crash
-```
-
-## Rename Workflow (Bootstrap a New Package)
-
-```bash
-git clone https://github.com/cryptoxdog/Constellation.PackageTemplate Constellation.<Capability>
-cd Constellation.<Capability>
-git remote set-url origin https://github.com/cryptoxdog/Constellation.<Capability>
-
-# Rename placeholders — IMPORTANT: subclasses MUST be renamed before the base class.
-# Replace <capability>, <Capability>, <CAPABILITY> with your actual values before running.
-find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.md" \) \
-  | xargs sed -i \
-      -e 's/constellation_template/constellation_<capability>/g' \
-      -e 's/constellation-template/constellation-<capability>/g' \
-      -e 's/TemplateConfigError/<Capability>ConfigError/g' \
-      -e 's/TemplateRuntimeError/<Capability>RuntimeError/g' \
-      -e 's/TemplateError/<Capability>Error/g' \
-      -e 's/TemplateConfig/<Capability>Config/g' \
-      -e 's/get_template_config/get_<capability>_config/g' \
-      -e 's/L9_TEMPLATE_/L9_<CAPABILITY>_/g'
-
-mv src/constellation_template src/constellation_<capability>
-
-# Verify rename
-pip install -e ".[dev]"
-make test
-
-# Push
-git add .
-git commit -m "feat: bootstrap constellation_<capability> from Constellation.PackageTemplate"
-git push -u origin main
-```
-
 ## Package Naming Convention
 
-| Dimension | Pattern | Example |
-|---|---|---|
-| PyPI name | `constellation-<capability>` | `constellation-ingest` |
-| Python import | `constellation_<capability>` | `constellation_ingest` |
-| Env var prefix | `L9_<CAPABILITY>_` | `L9_INGEST_` |
-| GitHub repo | `Constellation.<Capability>` | `Constellation.Ingest` |
-| Config class | `<Capability>Config` | `IngestConfig` |
-| Config factory | `get_<capability>_config()` | `get_ingest_config()` |
-| Base exception | `<Capability>Error` | `IngestError` |
+| Dimension       | Pattern                      | Example                  |
+|-----------------|------------------------------|--------------------------|
+| PyPI name       | `constellation-<capability>` | `constellation-ingest`   |
+| Python import   | `constellation_<capability>` | `constellation_ingest`   |
+| Env prefix      | `L9_<CAPABILITY>_`           | `L9_INGEST_`             |
+| GitHub repo     | `Constellation.<Capability>` | `Constellation.Ingest`   |
+| Config class    | `<Capability>Config`         | `IngestConfig`           |
+| Config factory  | `get_<capability>_config()`  | `get_ingest_config()`    |
+| Base exception  | `<Capability>Error`          | `IngestError`            |

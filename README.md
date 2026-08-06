@@ -2,14 +2,13 @@
 
 Canonical scaffold for all `constellation_*` birth-dependency packages in the L9 Constellation architecture.
 
-## What this is
-
 Every `constellation_*` infrastructure package shares an identical foundation layer.
-This repo is that foundation. Clone → rename `<capability>` → write unique logic. Done.
+Clone → rename `<capability>` → write unique logic. Done.
 
-The entire foundation (pyproject, config, errors, health, AGENTS.md, CI, Makefile, tests) is
-pre-built and pre-validated. Build cycles for new packages start at the unique logic layer, not
-from scratch.
+The entire foundation (`pyproject.toml`, config, errors, health, AGENTS.md, CI, Makefile, tests) is
+pre-built and pre-validated. Build cycles for new packages start at the unique logic layer, not from scratch.
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the layer model, dependency direction rules, and naming conventions.
 
 ---
 
@@ -35,11 +34,9 @@ find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.m
 
 mv src/constellation_template src/constellation_<capability>
 
-# Verify
 pip install -e ".[dev]"
 make test
 
-# Push
 git add .
 git commit -m "feat: bootstrap constellation_<capability> from Constellation.PackageTemplate"
 git push -u origin main
@@ -49,9 +46,9 @@ git push -u origin main
 
 ## What to Add (Unique Logic Only)
 
-After renaming, every new package only needs:
+After renaming, a new package only needs:
 
-1. **Config fields** — add to `<Capability>Config` with safe defaults + `L9_<CAPABILITY>_*` env vars (pydantic-settings reads them automatically via `env_prefix`)
+1. **Config fields** — add to `<Capability>Config` with safe defaults; `L9_<CAPABILITY>_*` env vars are read automatically via `env_prefix`
 2. **Logic modules** — add under `src/constellation_<capability>/`
 3. **Public exports** — add to `__init__.py` `__all__`
 4. **Unit tests** — add under `tests/unit/`
@@ -70,35 +67,3 @@ Every `constellation_*` package must pass all three before shipping to nodes:
 2. from <package> import X         → works with zero config
 3. get_<capability>_config()       → returns safe defaults, never raises
 ```
-
----
-
-## Layer Model
-
-```
-domain-*               →  imports constellation_* + constellation_node_sdk
-constellation_*        →  imports constellation_node_sdk only  ← THIS LAYER
-constellation_node_sdk →  imports nothing within constellation
-```
-
----
-
-## Naming Convention
-
-| Dimension       | Pattern                      | Example                  |
-|-----------------|------------------------------|--------------------------|
-| PyPI name       | `constellation-<capability>` | `constellation-ingest`   |
-| Python import   | `constellation_<capability>` | `constellation_ingest`   |
-| Env prefix      | `L9_<CAPABILITY>_`           | `L9_INGEST_`             |
-| GitHub repo     | `Constellation.<Capability>` | `Constellation.Ingest`   |
-| Config class    | `<Capability>Config`         | `IngestConfig`           |
-| Config factory  | `get_<capability>_config()`  | `get_ingest_config()`    |
-| Base exception  | `<Capability>Error`          | `IngestError`            |
-
----
-
-## Authority Order
-
-`user_latest_instruction` > `active_artifact` > `source_files` > `kernel`
-
-Unknowns are labeled `Unknown`. Nothing is fabricated.
