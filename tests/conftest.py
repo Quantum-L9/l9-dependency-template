@@ -1,4 +1,5 @@
 """Root conftest — shared session-scoped fixtures for all test scopes."""
+
 from __future__ import annotations
 
 import pytest
