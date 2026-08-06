@@ -1,0 +1,6 @@
+org: cryptoxdog
+repo_name: Constellation.LineageGraph
+package_name: constellation_lineage_graph
+description: records and queries artifact lineage in Neo4j for the L9 constellation
+play_number: 4
+work_dir: /tmp/l9-plays

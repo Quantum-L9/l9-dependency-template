@@ -1,0 +1,7 @@
+# Play runner config — copy to config.yaml and fill in values
+org: "cryptoxdog"
+repo_name: "Constellation.CHANGE_ME"
+package_name: "constellation_change_me"
+description: "CHANGE ME — one-line description of this dependency package"
+play_number: 0
+work_dir: "/tmp/l9-plays"

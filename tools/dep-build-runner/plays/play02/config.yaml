@@ -1,0 +1,7 @@
+org: cryptoxdog
+repo_name: Constellation.TransportPacket
+package_name: constellation_transport_packet
+description: canonical TransportPacket Pydantic v2 model with derive/with_hop/with_delegation
+  builders for all L9 inter-node transport
+play_number: 2
+work_dir: /tmp/l9-plays

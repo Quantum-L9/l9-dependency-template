@@ -1,0 +1,7 @@
+org: cryptoxdog
+repo_name: Constellation.ConfigLoader
+package_name: constellation_config_loader
+description: loads, validates, and distributes typed configuration to all Constellation
+  packages
+play_number: 8
+work_dir: /tmp/l9-plays
