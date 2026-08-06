@@ -11,14 +11,19 @@ status: active
 Canonical structured logging scaffold for constellation_* packages.
 configure_logging() is opt-in. get_logger() is always safe at module level.
 """
+
 from __future__ import annotations
+
 import logging
 import threading
+from typing import cast
+
 import structlog
 
 
 class _State:
     """Module-level singleton state via class body to avoid global mutation."""
+
     lock: threading.Lock = threading.Lock()
     configured: bool = False
 
@@ -40,8 +45,7 @@ def configure_logging(*, level: str = "INFO", render_json: bool = True) -> None:
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.ExceptionRenderer(),
-            structlog.processors.JSONRenderer() if render_json
-            else structlog.dev.ConsoleRenderer(),
+            structlog.processors.JSONRenderer() if render_json else structlog.dev.ConsoleRenderer(),
         ]
         structlog.configure(
             processors=processors,
@@ -55,4 +59,5 @@ def configure_logging(*, level: str = "INFO", render_json: bool = True) -> None:
 
 def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
     """Return a structlog BoundLogger. Safe at module level. Never auto-configures."""
-    return structlog.get_logger(name or "constellation_template")
+    logger = structlog.get_logger(name or "constellation_template")
+    return cast(structlog.stdlib.BoundLogger, logger)

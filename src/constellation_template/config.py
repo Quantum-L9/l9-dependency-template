@@ -8,8 +8,11 @@ owner: platform-team
 status: active
 --- /L9_META ---
 """
+
 from __future__ import annotations
+
 from functools import lru_cache
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +24,7 @@ class TemplateConfig(BaseSettings):
     Frozen and strict: no extra fields, no mutation.
     pydantic-settings reads L9_TEMPLATE_<FIELD> env vars automatically.
     """
+
     model_config = SettingsConfigDict(
         env_prefix="L9_TEMPLATE_",
         frozen=True,
