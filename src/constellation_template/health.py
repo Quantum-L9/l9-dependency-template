@@ -8,7 +8,9 @@ owner: platform-team
 status: active
 --- /L9_META ---
 """
+
 from __future__ import annotations
+
 import threading
 from importlib.metadata import PackageNotFoundError, version
 
@@ -26,11 +28,24 @@ except PackageNotFoundError:
 
 class HealthResult:
     """Immutable health snapshot for a constellation_* capability."""
+
     __slots__ = ("capability", "version", "enabled", "status", "warnings", "details")
+    capability: str
+    version: str
+    enabled: bool
+    status: str
+    warnings: list[str]
+    details: dict[str, object]
 
     def __init__(
-        self, *, capability: str, version: str, enabled: bool,
-        status: str, warnings: list[str], details: dict[str, object],
+        self,
+        *,
+        capability: str,
+        version: str,
+        enabled: bool,
+        status: str,
+        warnings: list[str],
+        details: dict[str, object],
     ) -> None:
         object.__setattr__(self, "capability", capability)
         object.__setattr__(self, "version", version)
@@ -39,7 +54,7 @@ class HealthResult:
         object.__setattr__(self, "warnings", warnings)
         object.__setattr__(self, "details", details)
 
-    def __setattr__(self, name: str, value: object) -> None:  # type: ignore[override]
+    def __setattr__(self, name: str, value: object) -> None:
         msg = f"HealthResult is immutable — cannot set {name!r}"
         raise AttributeError(msg)
 
@@ -66,15 +81,21 @@ def health_check() -> HealthResult:
             else:
                 status = "ok"
             result = HealthResult(
-                capability="constellation-template", version=_VERSION,
-                enabled=cfg.enabled, status=status,
-                warnings=warnings, details={"enabled": cfg.enabled},
+                capability="constellation-template",
+                version=_VERSION,
+                enabled=cfg.enabled,
+                status=status,
+                warnings=warnings,
+                details={"enabled": cfg.enabled},
             )
         except Exception as exc:  # noqa: BLE001
             _log.warning("health_check failed", error=str(exc))
             result = HealthResult(
-                capability="constellation-template", version=_VERSION,
-                enabled=False, status="degraded", warnings=[],
+                capability="constellation-template",
+                version=_VERSION,
+                enabled=False,
+                status="degraded",
+                warnings=[],
                 details={"error": str(exc)},
             )
     return result

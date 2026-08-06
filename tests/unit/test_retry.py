@@ -1,16 +1,23 @@
 """Unit tests for with_retry decorator."""
+
 from __future__ import annotations
+
 import pytest
+
 from constellation_template.retry import _TENACITY_AVAILABLE, with_retry
+
 
 def test_with_retry_returns_callable() -> None:
     assert callable(with_retry(max_attempts=2))
+
 
 def test_with_retry_success() -> None:
     @with_retry(max_attempts=2)
     def ok() -> str:
         return "ok"
+
     assert ok() == "ok"
+
 
 def test_with_retry_propagates_exception() -> None:
     calls: list[int] = []
@@ -29,10 +36,14 @@ def test_with_retry_propagates_exception() -> None:
     else:
         assert len(calls) == 1
 
+
 def test_with_retry_preserves_name() -> None:
     @with_retry()
-    def my_func() -> None: pass
+    def my_func() -> None:
+        pass
+
     assert my_func.__name__ == "my_func"
+
 
 def test_tenacity_flag_is_bool() -> None:
     assert isinstance(_TENACITY_AVAILABLE, bool)

@@ -8,16 +8,18 @@ owner: platform-team
 status: active
 --- /L9_META ---
 """
+
 from __future__ import annotations
-from enum import Enum
+
+from enum import StrEnum
 
 
-class ErrorCode(str, Enum):
-    UNKNOWN           = "TEMPLATE_UNKNOWN"
-    CONFIG_INVALID    = "TEMPLATE_CONFIG_INVALID"
-    CONFIG_MISSING    = "TEMPLATE_CONFIG_MISSING"
-    RUNTIME_FAILURE   = "TEMPLATE_RUNTIME_FAILURE"
-    RUNTIME_TIMEOUT   = "TEMPLATE_RUNTIME_TIMEOUT"
+class ErrorCode(StrEnum):
+    UNKNOWN = "TEMPLATE_UNKNOWN"
+    CONFIG_INVALID = "TEMPLATE_CONFIG_INVALID"
+    CONFIG_MISSING = "TEMPLATE_CONFIG_MISSING"
+    RUNTIME_FAILURE = "TEMPLATE_RUNTIME_FAILURE"
+    RUNTIME_TIMEOUT = "TEMPLATE_RUNTIME_TIMEOUT"
 
 
 class TemplateError(Exception):
@@ -26,6 +28,7 @@ class TemplateError(Exception):
     Structured fields allow direct structlog logging without string formatting:
         log.error("operation failed", code=exc.code, **exc.context)
     """
+
     def __init__(
         self,
         message: str,
@@ -43,24 +46,33 @@ class TemplateError(Exception):
 
     def __repr__(self) -> str:
         return (
-            f"{type(self).__name__}({self.args[0]!r}, "
-            f"code={self.code!r}, context={self.context!r})"
+            f"{type(self).__name__}({self.args[0]!r}, code={self.code!r}, context={self.context!r})"
         )
 
 
 class TemplateConfigError(TemplateError):
     """Raised when configuration is invalid or cannot be loaded."""
+
     def __init__(
-        self, message: str, *, code: str | ErrorCode = ErrorCode.CONFIG_INVALID,
-        context: dict[str, object] | None = None, cause: BaseException | None = None,
+        self,
+        message: str,
+        *,
+        code: str | ErrorCode = ErrorCode.CONFIG_INVALID,
+        context: dict[str, object] | None = None,
+        cause: BaseException | None = None,
     ) -> None:
         super().__init__(message, code=code, context=context, cause=cause)
 
 
 class TemplateRuntimeError(TemplateError):
     """Raised when a runtime operation fails."""
+
     def __init__(
-        self, message: str, *, code: str | ErrorCode = ErrorCode.RUNTIME_FAILURE,
-        context: dict[str, object] | None = None, cause: BaseException | None = None,
+        self,
+        message: str,
+        *,
+        code: str | ErrorCode = ErrorCode.RUNTIME_FAILURE,
+        context: dict[str, object] | None = None,
+        cause: BaseException | None = None,
     ) -> None:
         super().__init__(message, code=code, context=context, cause=cause)
